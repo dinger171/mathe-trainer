@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MATHE TRAINER</title>
+    <!--website font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <!--website css-->
+    <link rel="stylesheet" href="./trainer-main-page/index.css">
+    <!--website icon-->
+    <link rel="icon" href="favicon.png" type="image/x-icon">
+    <!--other website icons-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=menu" />
+</head>
+<body>
+    <header>
+        <h1>Mathe Trainer</h1>
+        <p>traniere dich!!!</p>
+    </header>
+
+    <div class="content">
+        <div class="history block">
+            <h2>Ihre letzten Sitzungen</h2>
+            <table class="history-content">
+                <tr>
+                    <th>Zeit</th>
+                    <th>Frage</th>
+                </tr>
+            </table>
+        </div>
+        <div class="ranking block">
+            <h2>Rangliste</h2>
+            <div class="rank-type-button-wrapper">
+                <button id="addition-rank" class="rank-type-button">addieren</button>
+                <button id="subtraction-rank" class="rank-type-button">subtrachieren</button>
+                <button id="multiplication-rank" class="rank-type-button">multiplizieren</button>
+                <button id="division-rank" class="rank-type-button">dividieren</button>
+                <button id="all-rank" class="rank-type-button">alle</button>
+            </div>
+            <table>
+                <tr>
+                    <th>Platz</th>
+                    <th>Name</th>
+                    <th>Punkte</th>
+                </tr>
+                <tbody class="ranking-content">
+                    <!-- Rankings will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+        <form action="/trainer-start" method="post">
+            <button class="startbutton" type="submit">starten</button>
+        </form>
+    </div>
+
+
+    <footer>
+        <p>Made by David studios</p>
+        <p>Made using <a target="_blank" href="https://icons8.com/icon/9470/math">Math</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a></p>
+    </footer>
+
+    <script src="./trainer-main-page/formhelper.js"></script>
+    <script src="./trainer-main-page/infoHandler.js"></script>
+    <script src="./trainer-main-page/rankHandler.js"></script>
+
+    <link rel="stylesheet" href="./rightmenu.css">
+    <script src="./rightmenu.js"></script>
+</body>
+</html>

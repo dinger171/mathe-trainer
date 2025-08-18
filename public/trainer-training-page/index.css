@@ -1,0 +1,70 @@
+:root {
+    --background-color: #f4f4f4;
+    --default-text-color: black;
+
+    --header-background-color: #e1e1e1;
+
+    --content-background-color: #ffffff;
+    --start-button-color: #4CAF50;
+
+    --footer-font-size: 1.2rem;
+    --footer-element-count: 2;
+}
+
+header {
+    background-color: var(--header-background-color);
+    text-align: center;
+    top: 0;
+    width: 100%;
+    position: fixed;
+}
+body {
+    font-family: Roboto, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    font-size: larger;
+}
+
+.content {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--content-background-color);
+    margin-top: calc(var(--footer-font-size)*var(--footer-element-count) *3);
+
+    padding: 25px;
+
+    text-align: center;
+}
+
+.question {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.answer {
+    width: 45%;
+    aspect-ratio: 6/1;
+    font-size: larger;
+    font-weight: bold;
+    border-radius: 1.4rem;
+    border: 0;
+    outline: none;
+    background: linear-gradient(90deg, aqua, rgb(0, 255, 128));
+    background-size: 200% 100%;
+    background-position: left;
+    transition: background-position 1s ease;
+}
+
+.answer:focus {
+    background-position: right;
+}
+
+.mainpagebutton {
+    position: fixed;
+    bottom: 2rem;
+    transform: scale(5);
+    right: 2.5rem;
+}
