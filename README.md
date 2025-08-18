@@ -6,7 +6,7 @@ costenlose alternative für mathtrainer.ai mit admin panele, automatische mathe 
 <img width="1904" height="916" alt="image" src="https://github.com/user-attachments/assets/073f92ce-d882-41a4-bbc2-1c0c3836612a" />
 
 installieren:
-  1.installieren Sie das Node.js: https://nodejs.org/en/download<br>
+  1.installieren Sie das Node.js: https://nodejs.org/en/download mit npm<br>
   2.Kopieren Sie das Repository:
     gh repo clone dinger171/mathe-trainer
     oder
