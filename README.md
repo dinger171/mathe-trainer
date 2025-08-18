@@ -6,17 +6,17 @@ costenlose alternative für mathtrainer.ai mit admin panele, automatische mathe 
 <img width="1904" height="916" alt="image" src="https://github.com/user-attachments/assets/073f92ce-d882-41a4-bbc2-1c0c3836612a" />
 
 installieren:
-  1. installieren Sie das Node.js: https://nodejs.org/en/download
+  1.installieren Sie das Node.js: https://nodejs.org/en/download<br>
   2.Kopieren Sie das Repository:
     gh repo clone dinger171/mathe-trainer
     oder
     installieren Sie den zip file
-  3. öffnen Sie das Ordner in Termial
+  3.öffnen Sie das Ordner in Termial
     <img width="1650" height="862" alt="image" src="https://github.com/user-attachments/assets/78a0e6e6-d112-434d-9926-3f602200383f" />
   4.Kopieren Sie das Befehl und tasten "Enter"
     npm run start
     <img width="1659" height="901" alt="image" src="https://github.com/user-attachments/assets/7ac28e66-6d3f-4811-b9c7-3cfad5e08681" />
-  5. öffnet in website
+  5.öffnet in website
     localhost:3000
     <img width="1907" height="986" alt="image" src="https://github.com/user-attachments/assets/9d2ee0c1-50ef-4431-945a-f218ce3fe77a" />
 
