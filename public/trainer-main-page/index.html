@@ -13,7 +13,7 @@
     <!--website icon-->
     <link rel="icon" href="favicon.png" type="image/x-icon">
     <!--other website icons-->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=menu" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 </head>
 <body>
     <header>
@@ -52,7 +52,7 @@
             </table>
         </div>
         <form action="/trainer-start" method="post">
-            <button class="startbutton" type="submit">starten</button>
+            <button class="startbutton" type="submit" onclick="start">starten</button>
         </form>
     </div>
 
@@ -62,11 +62,16 @@
         <p>Made using <a target="_blank" href="https://icons8.com/icon/9470/math">Math</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a></p>
     </footer>
 
+    <script src="../audioloader.js"></script>
+
     <script src="./trainer-main-page/formhelper.js"></script>
     <script src="./trainer-main-page/infoHandler.js"></script>
     <script src="./trainer-main-page/rankHandler.js"></script>
 
     <link rel="stylesheet" href="./rightmenu.css">
     <script src="./rightmenu.js"></script>
+
+    <link rel="stylesheet" href="./volume_toggle.css">
+    <script src="./volume_toggle.js"></script>
 </body>
 </html>

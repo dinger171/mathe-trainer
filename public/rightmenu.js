@@ -102,6 +102,7 @@ function update_wanted_questions() {
     .catch(error => {
         console.error('Error updating wanted questions:', error);
     });
+    switch_audio.play(); // Play switch sound
 }
 
 // Добавление обработчиков событий

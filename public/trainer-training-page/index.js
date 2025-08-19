@@ -52,6 +52,8 @@ function start() {
 answerInput.addEventListener('input', () => {
     const userAnswer = parseFloat(answerInput.value);
     if (userAnswer === currentAnswer) {
+        correct_audio.play(); // Play correct answer sound
+        
         console.log('Sending feedback with time:', time);
 
         fetch('/questions-feedback', {

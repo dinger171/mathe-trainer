@@ -7,6 +7,7 @@ const allbutton = document.getElementById("all-rank");
 let type;
 
 function setType(newType) {
+    if (type === newType) return; // No change, do nothing
     type = newType;
     additionbutton.classList.remove("active");
     subtractionbutton.classList.remove("active");
@@ -17,22 +18,29 @@ function setType(newType) {
     switch (type) {
         case "addition":
             additionbutton.classList.add("active");
+            localStorage.setItem("rankType", "addition");
             break;
         case "subtraction":
             subtractionbutton.classList.add("active");
+            localStorage.setItem("rankType", "subtraction");
             break;
         case "multiplication":
             multiplicationbutton.classList.add("active");
+            localStorage.setItem("rankType", "multiplication");
             break;
         case "division":
             divisionbutton.classList.add("active");
+            localStorage.setItem("rankType", "division");
             break;
         default:
             allbutton.classList.add("active");
+            localStorage.setItem("rankType", "all");
+            break;
     }
     updateRankings()
+    switch_audio.play(); // Play switch sound
 }
-setType("all"); // Default type
+localStorage.getItem("rankType") ? setType(localStorage.getItem("rankType")) : setType("all");
 additionbutton.addEventListener("click", () => setType("addition"));
 subtractionbutton.addEventListener("click", () => setType("subtraction"));
 multiplicationbutton.addEventListener("click", () => setType("multiplication"));
