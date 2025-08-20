@@ -2,25 +2,23 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const fs = require('fs');
+const { type } = require('os');
 const PORT = process.env.PORT || 3000;
-const multer = require('multer');
+
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-
-const users = JSON.parse(fs.readFileSync('users.json', 'utf8'));
-
 app.get('/', (req, res) => {
     const clientIp = req.ip;
-        if (isAuthenticated(clientIp) && isadmin(clientIp)) {
-            res.sendFile(path.join(__dirname, 'public/admin-panel', 'index.html'));
-        } else if (isAuthenticated(clientIp)) {
-            res.sendFile(path.join(__dirname, 'public/trainer-main-page', 'index.html'));
-        } else {
-            res.sendFile(path.join(__dirname, 'public/login-page', 'index.html'));
-        }
+    if (isAuthenticated(clientIp) && isadmin(clientIp)) {
+        res.sendFile(path.join(__dirname, 'public/admin-panel', 'index.html'));
+    } else if (isAuthenticated(clientIp)) {
+        res.sendFile(path.join(__dirname, 'public/trainer-main-page', 'index.html'));
+    } else {
+        res.sendFile(path.join(__dirname, 'public/login-page', 'index.html'));
+    }
 });
 
 app.get('/questions', (req, res) => {
@@ -144,7 +142,7 @@ app.post('/auth', (req, res) => {
     }
     try {
         fs.writeFileSync('users.json', JSON.stringify(users, null, 2), 'utf8');
-        res.redirect('/');
+        res.redirect('/')
     } catch (err) {
         console.error('Ошибка при записи файла:', err);
         res.status(500).send('Ошибка сервера.');
@@ -200,6 +198,18 @@ app.post('/update-wanted-questions', (req, res) => {
     const clientIp = req.ip;
     const users = JSON.parse(fs.readFileSync('users.json', 'utf8'));
     const user = users.find(entry => entry.ip.includes(clientIp));
+    let isValid = false;
+    for (const type in req.body) {// Validate input
+        if (typeof req.body[type] !== 'boolean') {
+            return res.status(400).send(`Invalid value for ${type}. Expected boolean.`);
+        }
+        if (req.body[type] == true && isValid == false) {
+            isValid = true;
+        }
+    }
+    if (!isValid) {
+        return res.status(400).send('At least one question type must be selected.');
+    }
     if (user) {
         user.wantedQuestions = {
             addition,
@@ -246,6 +256,8 @@ app.get('/user-page', (req, res) => {
                 <html>
                 <head>
                     <title>Nutzer Seite</title>
+                    <!--website icon-->
+                    <link rel="icon" href="favicon.png" type="image/x-icon">
                     <link rel="stylesheet" href="./admin-panel/user-controll.css">
                     <link rel="favicon" href="./favicon.png" type="image/x-icon">
                 </head>
@@ -269,7 +281,7 @@ app.get('/user-page', (req, res) => {
                         </p>
                         <p>
                             <div class="switch-container">
-                                <span class="switch-label">Rank verstecken</span>
+                                <span class="switch-label">Rang verstecken</span>
                                 <label class="switch">
                                     <input type="checkbox" id="rankhidden-checkbox" ${serchedUser.isrankhidden ? "checked" : ""} />
                                     <div class="slider round"></div>
@@ -291,10 +303,10 @@ app.get('/user-page', (req, res) => {
 
                     function updateLevels() {
                         const levels = {
-                            addition: additionInput.value,
-                            subtraction: subtractionInput.value,
-                            multiplication: multiplicationInput.value,
-                            division: divisionInput.value
+                            addition: Number(additionInput.value),
+                            subtraction: Number(subtractionInput.value),
+                            multiplication: Number(multiplicationInput.value),
+                            division: Number(divisionInput.value)
                         };
                         fetch('/update-user-levels', {
                             method: 'POST',
@@ -302,7 +314,7 @@ app.get('/user-page', (req, res) => {
                             body: JSON.stringify({ user: '${serchedUser.login}', password: '${serchedUser.password}', levels })
                         }).then(response => {
                             if (response.ok) {
-                                alert('Levels updated successfully!');
+                                console.log('succsess')
                             } else {
                                 alert('Failed to update levels.');
                             }
@@ -323,6 +335,9 @@ app.get('/user-page', (req, res) => {
                         }).then(response => {
                             if (response.ok) {
                                 console.log('Admin status updated successfully!');
+                                setTimeout(() => {
+                                   window.location.href = '/' 
+                                }, 500);
                             } else {
                                 console.log('Failed to update admin status.');
                             }
@@ -355,6 +370,7 @@ app.get('/user-page', (req, res) => {
         }
     }
 })
+
 app.post('/update-user-levels', (req, res) => {
     if (isAuthenticated(req.ip) && isadmin(req.ip)) {
         const login = req.body.user;
@@ -365,18 +381,22 @@ app.post('/update-user-levels', (req, res) => {
         const division = req.body.levels.division;
         const users = JSON.parse(fs.readFileSync('users.json', 'utf8'));
         const serchedUser = users.find(entry => entry.login === login && entry.password === password);
-        if (serchedUser) {
-            serchedUser.levels = {
-                addition: addition,
-                subtraction: subtraction,
-                multiplication: multiplication,
-                division: division
-            };
-            fs.writeFileSync('users.json', JSON.stringify(users, null, 2), 'utf8');
-            res.send('User levels updated successfully.');
-        }
-        else {
-            res.status(404).send('User not found.');
+        if (typeof addition === "number" && typeof subtraction === "number" && typeof multiplication === "number" && typeof division === "number") {
+            if (serchedUser) {
+                serchedUser.levels = {
+                    addition: addition,
+                    subtraction: subtraction,
+                    multiplication: multiplication,
+                    division: division
+                };
+                fs.writeFileSync('users.json', JSON.stringify(users, null, 2), 'utf8');
+                res.send('User levels updated successfully.');
+            }
+            else {
+                res.status(404).send('User not found.');
+            }
+        } else {
+            res.status(400).send('NaN')
         }
     } else {
         res.status(403).send('NOT AUTHERIZED/ADMIN');
@@ -432,7 +452,7 @@ app.get('/logout', (req, res) => {
     });
     fs.writeFileSync('users.json', JSON.stringify(users, null, 2), 'utf8');
     console.log('User logged out:', clientIp);
-    res.redirect('/');
+    res.sendFile(path.join(__dirname, 'public/login-page', 'index.html'));
 });
 
 function isAuthenticated(ip) {
