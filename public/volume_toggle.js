@@ -18,6 +18,8 @@ function updateVolume() {
     switch_audio.volume  = isVolumeOn ? 1 : 0;
     start_audio.volume   = isVolumeOn ? 1 : 0;
     correct_audio.volume = isVolumeOn ? 1 : 0;
+    start_audio.volume   = isVolumeOn ? 1 : 0;
+    hover_audio.volume   = isVolumeOn ? 1 : 0;
 }
 
 volumeToggle.addEventListener('click', () => {
