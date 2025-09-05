@@ -33,7 +33,7 @@ body {
    ======================= */
 
 #backbutton {
-    position: absolute;
+    position: fixed;
     top: 1rem;
     left: 1rem;
     padding: 0.5rem 1rem;

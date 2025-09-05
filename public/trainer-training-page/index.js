@@ -4,7 +4,6 @@ let currentAnswer = null;
 let storedtype = null;
 let time = 0;
 
-// ⏲️ Правильный таймер
 setInterval(() => {
     time++;
 }, 1000);
@@ -44,7 +43,6 @@ function start() {
 
             questionP.textContent = question;
             currentAnswer = answer;
-            console.log('Generated question:', question, 'Answer:', answer);
         })
         .catch(error => console.error('Ошибка получения данных:', error));
 }
@@ -52,6 +50,8 @@ function start() {
 answerInput.addEventListener('input', () => {
     const userAnswer = parseFloat(answerInput.value);
     if (userAnswer === currentAnswer) {
+        correct_audio.play(); // Play correct answer sound
+        
         console.log('Sending feedback with time:', time);
 
         fetch('/questions-feedback', {

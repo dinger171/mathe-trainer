@@ -70,10 +70,12 @@ rightmenu.insertAdjacentHTML('beforeend', `
 // Обработчики открытия и закрытия меню
 rightmenu_openbtn.addEventListener('click', () => {
     rightmenu.style.right = '0';
+    hover_audio.play(); // Play hover sound
 });
 rightmenu_closebtn.addEventListener('click', () => {
     rightmenu.style.right = '-25rem';
     console.log('rightmenu closed');
+    hover_audio.play(); // Play hover sound
 });
 
 // Обновление состояния
@@ -82,6 +84,10 @@ function update_wanted_questions() {
     const isSubtractionWanted = document.getElementById('subtraction-checkbox').checked;
     const isMultiplicationWanted = document.getElementById('multiplication-checkbox').checked;
     const isDivisionWanted = document.getElementById('division-checkbox').checked;
+    if (!isAdditionWanted && !isSubtractionWanted && !isMultiplicationWanted && !isDivisionWanted) {
+        alert('Bitte mindestens eine Kategorie auswählen!');
+        return;
+    }
 
     fetch('/update-wanted-questions', {
         method: 'POST',
@@ -102,6 +108,7 @@ function update_wanted_questions() {
     .catch(error => {
         console.error('Error updating wanted questions:', error);
     });
+    switch_audio.play(); // Play switch sound
 }
 
 // Добавление обработчиков событий
