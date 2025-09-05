@@ -138,7 +138,15 @@ app.post('/auth', (req, res) => {
             },
             history: []
         };
-        users.push(userinfo);
+        // sanitize
+        userinfo.login = userinfo.login.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        // too long username
+        if (userinfo.login.length > 20) {
+            return res.send('name ist zu lang (max 20 zeichen)').status(400);
+        } else {
+            // Добавляем нового пользователя
+            users.push(userinfo);
+        }
     }
     try {
         fs.writeFileSync('users.json', JSON.stringify(users, null, 2), 'utf8');
