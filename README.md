@@ -28,3 +28,5 @@ admin zu werden:<br>
   nach "history": [] hinzufügen Sie: , "isadmin": true<br>
   und speichert<br>
   <img width="1923" height="1023" alt="image" src="https://github.com/user-attachments/assets/bd3205cb-d217-4db4-a287-534c4405301a" /><br>
+
+MIT LICENSE
