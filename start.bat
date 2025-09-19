@@ -1,1 +1,1 @@
-./node/node.exe server.js
+powershell ./node/node.exe server.js

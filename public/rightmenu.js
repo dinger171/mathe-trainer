@@ -1,7 +1,11 @@
 console.log('rightmenu.js loaded');
+let user = {}
+function fetch_localstorage() {
+    // Получение данных пользователя из localStorage
+    user = JSON.parse(localStorage.getItem('user') || '{}');
+}
+fetch_localstorage()
 
-// Получение данных пользователя из localStorage
-const user = JSON.parse(localStorage.getItem('user') || '{}');
 
 // Создание элементов
 const rightmenu = document.createElement('div');
@@ -31,7 +35,7 @@ document.body.appendChild(rightmenu);
 
 // Добавление HTML (без удаления уже добавленных элементов)
 rightmenu.insertAdjacentHTML('beforeend', `
-    <h2 align='center'>${user.login}</h2>
+    <h2 align='center' id="username">${user.login}</h2>
 
     <div class="switch-container">
         <span class="switch-label">Addition</span>
@@ -64,8 +68,31 @@ rightmenu.insertAdjacentHTML('beforeend', `
             <div class="slider round"></div>
         </label>
     </div>
+    <div id="qrcode"></div>
 `);
+// qrcode generation
+let loginUrl = `http://${window.location.hostname}:3000/login-url?username=${encodeURIComponent(user.login)}&password=${encodeURIComponent(user.password)}`;
 
+function generateqrcode() {
+    fetch('/generate-qrcode?url=' + encodeURIComponent(loginUrl))
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('qrcode').innerHTML = data;
+        })
+        .catch(error => console.error('Error fetching QR code:', error));
+}
+generateqrcode()
+
+function update_rightmenu() {
+    fetch_localstorage()
+    loginUrl = `http://${window.location.hostname}:3000/login-url?username=${encodeURIComponent(user.login)}&password=${encodeURIComponent(user.password)}`;
+    generateqrcode()
+
+    // update display name
+    document.getElementById('username').innerText = user.login
+}
+update_rightmenu()
+setInterval(update_rightmenu,3000)
 
 // Обработчики открытия и закрытия меню
 rightmenu_openbtn.addEventListener('click', () => {
