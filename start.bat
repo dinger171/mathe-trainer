@@ -1,0 +1,1 @@
+powershell ./node/node.exe server.js

@@ -4,11 +4,22 @@ const path = require('path');
 const fs = require('fs');
 const { type } = require('os');
 const PORT = process.env.PORT || 3000;
+const QRCode = require('qrcode');
 
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+function sanitize(input) {
+    if (typeof input !== 'string') return '';
+    return input
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+}
+
 
 app.get('/', (req, res) => {
     const clientIp = req.ip;
@@ -82,7 +93,8 @@ app.post('/questions-feedback', (req, res) => {
     user.history.push({
         timestamp: new Date().toISOString(),
         levels: { ...user.levels },
-        question: req.body.question
+        question: req.body.question,
+        time: time,
     });
 
     fs.writeFileSync('users.json', JSON.stringify(users, null, 2), 'utf8');
@@ -118,7 +130,7 @@ app.post('/auth', (req, res) => {
     const { username, password } = req.body;
 
     // Сценарий: логин
-    const existingUser = users.find(entry => entry.login === username && entry.password === password);
+    const existingUser = users.find(entry => entry.login === sanitize(username) && entry.password === sanitize(password));
     if (existingUser) {
         // Добавляем IP к существующему пользователю
         if (!existingUser.ip.includes(clientIp)) {
@@ -130,6 +142,8 @@ app.post('/auth', (req, res) => {
             login: username,
             password: password,
             ip: [clientIp],
+            school: '',
+            class: '',
             levels: {
                 addition: 0,
                 subtraction: 0,
@@ -139,10 +153,11 @@ app.post('/auth', (req, res) => {
             history: []
         };
         // sanitize
-        userinfo.login = userinfo.login.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-        // too long username
-        if (userinfo.login.length > 20) {
-            return res.send('name ist zu lang (max 20 zeichen)').status(400);
+        userinfo.login = sanitize(userinfo.login);
+        userinfo.password = sanitize(userinfo.password)
+        // too long username or password
+        if (userinfo.login.length > 20 || userinfo.password.length > 20) {
+            return res.send('name oder kennword ist zu lang (max 20 zeichen)<script>setTimeout(function() {window.location.href = "/"},3000)</script>').status(400);
         } else {
             // Добавляем нового пользователя
             users.push(userinfo);
@@ -154,6 +169,32 @@ app.post('/auth', (req, res) => {
     } catch (err) {
         console.error('Ошибка при записи файла:', err);
         res.status(500).send('Ошибка сервера.');
+    }
+});
+
+app.get('/login-url', (req, res) => { // for qr code login
+    let users = [];
+    try {
+        if (fs.existsSync('users.json')) {
+            users = JSON.parse(fs.readFileSync('users.json', 'utf8'));
+        }
+    } catch (err) {
+        console.error('Ошибка при чтении файла:', err);
+    }
+
+    const clientIp = req.ip;
+
+    let username = sanitize(req.query.username);
+    let password = sanitize(req.query.password);
+    const existingUser = users.find(entry => entry.login == username && entry.password == password);
+    console.log(existingUser)
+    if (existingUser) {
+        // Добавляем IP к существующему пользователю
+        existingUser.ip.push(clientIp);
+        fs.writeFileSync('users.json', JSON.stringify(users, null, 2), 'utf8');
+        return res.redirect('/');
+    } else {
+        return res.status(401).send('User not found.');
     }
 });
 
@@ -243,6 +284,68 @@ app.get('/get-wanted-questions', (req, res) => {
     }
 });
 
+// qrcode generator route
+app.get('/generate-qrcode', (req, res) => {
+    if (isAuthenticated(req.ip)) {
+        const url = req.query.url; // keep as string!
+
+        if (!url) {
+            return res.status(400).send('Missing url parameter');
+        }
+
+        QRCode.toDataURL(url, {scale: 10}, (err, src) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Error generating QR');
+            }
+
+            res.send(`<img src="${src}" alt="QR Code">`);
+        });
+    } else {
+        res.status(403).send('Forbidden');
+    }
+});
+
+app.post('/update-user-password', (req, res) => {
+    const clientIp = req.ip;
+
+    if (!isAuthenticated(clientIp)) {
+        return res.status(403).send('Not authorized');
+    }
+
+    const users = JSON.parse(fs.readFileSync('users.json', 'utf8'));
+
+    const username = req.query.username;
+    const oldPassword = req.query.oldpassword;
+    const newPassword = req.query.newpassword;
+
+    // ищем юзера
+    let user = users.find(entry => entry.ip.includes(clientIp));
+
+    // если админ, можно менять чужой пароль
+    if (isadmin(clientIp)) {
+        user = users.find(entry => entry.login === username);
+    }
+
+    if (!user) {
+        return res.status(404).send('User not found');
+    }
+
+    if ((user.login === username && user.password === oldPassword) || isadmin(clientIp)) {
+        if (!newPassword || typeof newPassword !== 'string') {
+            return res.status(400).send('Invalid new password');
+        }
+
+        user.password = sanitize(newPassword);
+
+        fs.writeFileSync('users.json', JSON.stringify(users, null, 2), 'utf8');
+        return res.send({ success: true, message: 'Password updated successfully!' });
+    } else {
+        return res.status(403).send('Wrong credentials');
+    }
+});
+
+
 // Admin panel routes
 app.get('/get-users-db', (req, res) => {
     const clientIp = req.ip;
@@ -276,7 +379,7 @@ app.get('/user-page', (req, res) => {
                     </header>
                     <div class="user-info">
                         <h2 id='login'>Name: ${serchedUser.login}</h2>
-                        <p>kennwort: ${serchedUser.password}</p>
+                        <p>kennwort: <input id="passwordinput" type="text" value="${serchedUser.password}"></p>
                         <p>IP: ${serchedUser.ip.join(', ') || 'none'}</p>
                         <p>
                             <div class="switch-container">
@@ -298,7 +401,7 @@ app.get('/user-page', (req, res) => {
                         </p>
 
                         <p>Ebenen: <br> addieren: <input value="${serchedUser.levels.addition}" id="additionLevelInput" type="number"><br> subtrachieren: <input value="${serchedUser.levels.subtraction}" id="subtractionLevelInput" type="number"><br>multiplication: <input value="${serchedUser.levels.multiplication}" id="multiplicationLevelInput" type="number"><br>dividieren: <input value="${serchedUser.levels.division}" id="divisionLevelInput" type="number"></p>
-                        <p>History: ${serchedUser.history.map(item => `<br>${new Date(item.timestamp).toLocaleString()}: ${JSON.stringify(item.question).replaceAll('"', '')}`).join('')}</p>
+                        <p>History: <p id="history"></p></p>
                     </div>
                     <script>
                     const additionInput = document.getElementById('additionLevelInput');
@@ -308,6 +411,37 @@ app.get('/user-page', (req, res) => {
 
                     const adminCheckbox = document.getElementById('admin-checkbox');
                     const rankHiddenCheckbox = document.getElementById('rankhidden-checkbox');
+
+                    const passwordInput = document.getElementById('passwordinput');
+
+                    function sanitize(input) {
+                        if (typeof input !== 'string') return '';
+                        return input
+                            .replaceAll('<', '&lt;')
+                            .replaceAll('>', '&gt;')
+                            .replaceAll('"', '&quot;')
+                            .replaceAll("'", '&#39;');
+                    }
+
+                    passwordInput.addEventListener('change', () => {
+                        const newPassword = encodeURIComponent(sanitize(passwordInput.value));
+
+                        fetch("/update-user-password?username=" + encodeURIComponent("${serchedUser.login}") +
+                            "&oldpassword=" + encodeURIComponent("${serchedUser.password}") +
+                            "&newpassword=" + newPassword, {
+                            method: 'POST'
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                console.log('Password updated successfully!');
+                                window.location.href = '/user-page?user=' + encodeURIComponent(sanitize("${serchedUser.login}")) +
+                                '&password=' + newPassword;
+                            } else {
+                                console.log('Failed to update password.');
+                            }
+                        });
+                    });
+
 
                     function updateLevels() {
                         const levels = {
@@ -368,6 +502,22 @@ app.get('/user-page', (req, res) => {
                         });
                     }
                     rankHiddenCheckbox.addEventListener('change', updateUserRankHiddenStatus);
+                    // history
+                    const historyElement = document.getElementById('history');
+                    const historyData = ${JSON.stringify(serchedUser.history)};
+                    if (historyData.length === 0) {
+                        historyElement.innerText = 'Benutzer hat keine aufgaben gemacht.';
+                    } else {
+                        for (let i = historyData.length; i > 0; i--) {
+                            const entry = historyData[i - 1];
+                            const entryElement = document.createElement('div');
+                            entryElement.classList.add('history-entry');
+                            entryElement.innerHTML = '<strong>' + new Date(entry.timestamp).toLocaleString() + '</strong><br>' +
+                                'Frage: ' + entry.question + '<br>' +
+                                'Zeit gebraucht: ' + entry.time + ' Sekunden<br><hr>';
+                            historyElement.appendChild(entryElement);
+                        }
+                    }
                 </script>
 
                     </body>
@@ -378,6 +528,7 @@ app.get('/user-page', (req, res) => {
         }
     }
 })
+
 
 app.post('/update-user-levels', (req, res) => {
     if (isAuthenticated(req.ip) && isadmin(req.ip)) {
