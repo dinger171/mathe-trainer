@@ -1,4 +1,4 @@
-costenlose alternative für mathtrainer.ai mit admin panele, automatische mathe fragen generator, rangliste und mehr!
+Kostenlose alternative für mathtrainer.ai mit admin Panele, automatische Mathefragen Generator, Rankliste und mehr!
 
 <img width="1904" height="915" alt="image" src="https://github.com/user-attachments/assets/51898dee-9dd5-4a7c-805c-58c89b503522" />
 <img width="1899" height="915" alt="image" src="https://github.com/user-attachments/assets/fd5add37-cfb9-49af-a2a8-6a926e5ab8f8" />
